@@ -1,0 +1,36 @@
+[
+  {
+    "condition": "NEW",
+    "details": {
+      "body": "hatchback",
+      "model": "A5 40 Tfsi S Line Mhev",
+      "manufacturer": {
+        "name": "audi"
+      },
+      "numberOfDoors": 2,
+      "fuelType": "petrol",
+      "engine": "2.0LHyb/PULP",
+      "mileage": 2000,
+      "modelYear": 2021,
+      "productionYear": 2021,
+      "externalColor": "silver"
+    }
+  },{
+  "condition": "USED",
+  "details": {
+    "body": "sedan",
+    "model": "Focus",
+    "manufacturer": {
+      "name": "Ford"
+    },
+    "numberOfDoors": 5,
+    "fuelType": "diesel",
+    "engine": "2.5",
+    "mileage": 20000,
+    "modelYear": 2000,
+    "productionYear": 2002,
+    "externalColor": "blue"
+  }
+}
+]
+]

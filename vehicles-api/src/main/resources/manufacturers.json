@@ -1,0 +1,22 @@
+[
+  {
+    "code": 100,
+    "name": "Audi"
+  },
+  {
+    "code": 101,
+    "name": "Chevrolet"
+  },
+  {
+    "code": 102,
+    "name": "Ford"
+  },
+  {
+    "code": 103,
+    "name": "BMW"
+  },
+  {
+    "code": 104,
+    "name": "Dodge"
+  }
+]

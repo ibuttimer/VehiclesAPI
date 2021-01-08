@@ -1,8 +1,11 @@
 package com.udacity.vehicles.domain.car;
 
 import com.udacity.vehicles.domain.Condition;
+import com.udacity.vehicles.domain.IValid;
 import com.udacity.vehicles.domain.Location;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -13,6 +16,8 @@ import javax.persistence.Id;
 import javax.persistence.Transient;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+
+import com.udacity.vehicles.domain.manufacturer.Manufacturer;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -22,7 +27,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
  */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-public class Car {
+public class Car implements IValid<Car> {
 
     @Id
     @GeneratedValue
@@ -44,7 +49,7 @@ public class Car {
 
     @Valid
     @Embedded
-    private Location location = new Location(0d, 0d);
+    private Location location = new Location();
 
     @Transient
     private String price;
@@ -104,4 +109,49 @@ public class Car {
     public void setPrice(String price) {
         this.price = price;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Car car = (Car) o;
+        return Objects.equals(id, car.id) && Objects.equals(createdAt, car.createdAt) && Objects.equals(modifiedAt, car.modifiedAt) && condition == car.condition && Objects.equals(details, car.details) && Objects.equals(location, car.location) && Objects.equals(price, car.price);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, createdAt, modifiedAt, condition, details, location, price);
+    }
+
+    @Override
+    public String toString() {
+        return "Car{" +
+                "id=" + id +
+                ", createdAt=" + createdAt +
+                ", modifiedAt=" + modifiedAt +
+                ", condition=" + condition +
+                ", details=" + details +
+                ", location=" + location +
+                ", price='" + price + '\'' +
+                '}';
+    }
+
+    @Override
+    public Car ensureValid() {
+        if (condition == null) {
+            condition = Condition.UNKNOWN;
+        }
+        if (details == null) {
+            details = new Details();
+        }
+        if (location == null) {
+            location = new Location();
+        }
+        for (IValid<?> obj : List.of(details, location)) {
+            obj.ensureValid();
+        }
+        return this;
+    }
+
+    public static final Car EMPTY = new Car();
 }

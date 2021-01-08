@@ -11,12 +11,12 @@ import javax.validation.constraints.NotNull;
  * the maps API.
  */
 @Embeddable
-public class Location {
+public class Location implements IValid<Location> {
 
-    @NotNull
+    @NotNull(message = "Latitude is mandatory")
     private Double lat;
 
-    @NotNull
+    @NotNull(message = "Longitude is mandatory")
     private Double lon;
 
     @Transient
@@ -32,6 +32,7 @@ public class Location {
     private String zip;
 
     public Location() {
+        this(0.0, 0.0);
     }
 
     public Location(Double lat, Double lon) {
@@ -77,5 +78,28 @@ public class Location {
 
     public void setZip(String zip) {
         this.zip = zip;
+    }
+
+    @Override
+    public String toString() {
+        return "Location{" +
+                "lat=" + lat +
+                ", lon=" + lon +
+                ", address='" + address + '\'' +
+                ", city='" + city + '\'' +
+                ", state='" + state + '\'' +
+                ", zip='" + zip + '\'' +
+                '}';
+    }
+
+    @Override
+    public Location ensureValid() {
+        if (lon == null) {
+            lon = 0.0;
+        }
+        if (lat == null) {
+            lat = 0.0;
+        }
+        return this;
     }
 }

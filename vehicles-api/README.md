@@ -3,6 +3,20 @@
 A REST API to maintain vehicle data and to provide a complete
 view of vehicle details including price and address.
 
+# Table of Contents
+1. [Features](#features)
+1. [Instructions](#instructions)
+    1. [TODOs](#todos)
+    1. [Run the Code](#run-the-code)
+1. [Build and Test](#build-and-test)
+1. [Arguments](#arguments)
+1. [Operations](#operations)
+    1. [Create a Vehicle](#create-a-vehicle)
+    1. [Retrieve a Vehicle](#retrieve-a-vehicle)
+    1. [Update a Vehicle](#update-a-vehicle)
+    1. [Delete a Vehicle](#delete-a-vehicle)
+1. [Database](#database)
+
 ## Features
 
 - REST API exploring the main HTTP verbs and features
@@ -26,7 +40,6 @@ view of vehicle details including price and address.
 To properly run this application you need to start the Orders API and
 the Service API first.
 
-
 ```
 $ mvn clean package
 ```
@@ -34,12 +47,90 @@ $ mvn clean package
 ```
 $ java -jar target/vehicles-api-0.0.1-SNAPSHOT.jar
 ```
+In a Windows environment, it may be build and run using
+```
+> build.cmd
+```
+and
+```
+> run.cmd
+```
 
 Import it in your favorite IDE as a Maven Project.
 
+## Build and Test
+There are three test classes in the project:
+- [VehiclesApiApplicationTests](vehicles-api/src/test/java/com/udacity/vehicles/VehiclesApiApplicationTests.java)
+  
+  Basic context load test
+- [CarControllerTest](vehicles-api/src/test/java/com/udacity/vehicles/api/CarControllerTest.java)
+
+  Mocked test
+- [CarControllerIntegrationTest](vehicles-api/src/test/java/com/udacity/vehicles/api/CarControllerIntegrationTest.java)
+
+  Integration test, requiring other services to be running
+
+|SPRING_PROFILES_ACTIVE|Required     |Comment|
+|----------------------|-------------|-------|
+|not set|<ul><li>[x] Eureka server</li><li>[x] Pricing service</li><li>[x] Maps service</li></ul>|Can run all tests |
+|"test" |<ul><li>[ ] Eureka server</li><li>[ ] Pricing service</li><li>[ ] Maps service</li></ul>|VehiclesApiApplicationTests and CarControllerTest only|
+
+As tests are run as part of the 
+```
+$ mvn clean package
+```
+and
+```
+> build.cmd
+```
+commands, please ensure to set the environment variable `SPRING_PROFILES_ACTIVE` according to the table above.
+
+## Arguments
+
+- --preload.manufacturer.file=`file.json`
+
+  Loads `file.json` from the resources folder and uses it to populate the database. Defaults to `manufacturers.json`.
+
+```json
+    [
+      {
+        "code": 100,
+        "name": "Audi"
+      },{
+        "code": 101,
+        "name": "Chevrolet"
+      }
+  ]
+```
+- --preload.car.file=`file.json`
+
+  Loads `file.json` from the resources folder and uses it to populate the database.
+
+```json
+  [
+    {
+      "condition": "NEW",
+      "details": {
+        "body": "hatchback",
+        "model": "A5 40 Tfsi S Line Mhev",
+        "manufacturer": {
+          "name": "Audi"
+        },
+        "numberOfDoors": 2,
+        "fuelType": "petrol",
+        "engine": "2.0LHyb/PULP",
+        "mileage": 2000,
+        "modelYear": 2021,
+        "productionYear": 2021,
+        "externalColor": "silver"
+      }
+    }
+  ]
+```
+
 ## Operations
 
-Swagger UI: http://localhost:8080/swagger-ui.html
+Swagger UI: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
 
 ### Create a Vehicle
 
@@ -109,3 +200,10 @@ the Vehicle information to be presented
 ### Delete a Vehicle
 
 `DELETE` `/cars/{id}`
+
+## Database
+To clear the database execute the following commands from the [H2 console](http://localhost:8080/h2-console)
+```roomsql
+
+```
+

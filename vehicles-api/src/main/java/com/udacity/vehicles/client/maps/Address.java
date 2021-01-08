@@ -13,6 +13,17 @@ public class Address {
     public Address() {
     }
 
+    public Address(String address, String city, String state, String zip) {
+        this.address = address;
+        this.city = city;
+        this.state = state;
+        this.zip = zip;
+    }
+
+    public static Address of(String address, String city, String state, String zip) {
+        return new Address(address, city, state, zip);
+    }
+
     public String getAddress() {
         return address;
     }

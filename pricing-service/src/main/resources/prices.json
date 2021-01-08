@@ -1,0 +1,12 @@
+[
+  {
+    "currency": "€",
+    "price": 12345,
+    "vehicleId": 100
+  },
+  {
+    "currency": "$",
+    "price": 6789,
+    "vehicleId": 101
+  }
+]

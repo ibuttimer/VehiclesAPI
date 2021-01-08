@@ -1,9 +1,19 @@
 package com.udacity.vehicles.service;
 
+import com.udacity.vehicles.client.maps.MapsClient;
+import com.udacity.vehicles.client.prices.PriceClient;
 import com.udacity.vehicles.domain.car.Car;
 import com.udacity.vehicles.domain.car.CarRepository;
-import java.util.List;
+import com.udacity.vehicles.domain.manufacturer.Manufacturer;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
+
+import javax.validation.Valid;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 /**
  * Implements the car service create, read, update or delete
@@ -11,16 +21,28 @@ import org.springframework.stereotype.Service;
  * location and price data when desired.
  */
 @Service
+@Validated
 public class CarService {
 
-    private final CarRepository repository;
+    public static final String UNKNOWN_BODY = "Unknown body";
+    public static final String UNKNOWN_MODEL = "Unknown model";
 
-    public CarService(CarRepository repository) {
+    private final CarRepository repository;
+    private final PriceClient pricing;
+    private final MapsClient maps;
+    private final ManufacturerService manufacturerService;
+
+
+    public CarService(CarRepository repository, PriceClient pricing, MapsClient maps,
+                      ManufacturerService manufacturerService) {
         /**
          * TODO: Add the Maps and Pricing Web Clients you create
          *   in `VehiclesApiApplication` as arguments and set them here.
          */
         this.repository = repository;
+        this.pricing = pricing;
+        this.maps = maps;
+        this.manufacturerService = manufacturerService;
     }
 
     /**
@@ -28,7 +50,9 @@ public class CarService {
      * @return a list of all vehicles in the CarRepository
      */
     public List<Car> list() {
-        return repository.findAll();
+        List<Car> cars = repository.findAll();
+        cars.forEach(c -> setPriceAndLocation(c, PriceClient.PriceMode.EXISTING));
+        return cars;
     }
 
     /**
@@ -42,8 +66,12 @@ public class CarService {
          *   If it does not exist, throw a CarNotFoundException
          *   Remove the below code as part of your implementation.
          */
-        Car car = new Car();
+        Optional<Car> optionalCar = repository.findById(id);
+        Car car = optionalCar.orElseThrow(CarNotFoundException::new);
+        return setPriceAndLocation(car, PriceClient.PriceMode.EXISTING);
+    }
 
+    private Car setPriceAndLocation(Car car, PriceClient.PriceMode priceMode) {
         /**
          * TODO: Use the Pricing Web client you create in `VehiclesApiApplication`
          *   to get the price based on the `id` input'
@@ -51,7 +79,8 @@ public class CarService {
          * Note: The car class file uses @transient, meaning you will need to call
          *   the pricing service each time to get the price.
          */
-
+        car.setPrice(
+                pricing.getByVehicleId(car.getId(), priceMode));
 
         /**
          * TODO: Use the Maps Web client you create in `VehiclesApiApplication`
@@ -61,7 +90,8 @@ public class CarService {
          * Note: The Location class file also uses @transient for the address,
          * meaning the Maps service needs to be called each time for the address.
          */
-
+        car.setLocation(
+                maps.getAddress(car.getLocation(), car.getId()));
 
         return car;
     }
@@ -71,34 +101,87 @@ public class CarService {
      * @param car A car object, which can be either new or existing
      * @return the new/updated car is stored in the repository
      */
-    public Car save(Car car) {
-        if (car.getId() != null) {
-            return repository.findById(car.getId())
+    public Car save(@Valid Car car) {
+        Car result;
+        AtomicReference<PriceClient.PriceMode> priceMode = new AtomicReference<>(PriceClient.PriceMode.FORCE_NEW);
+        if (car.getId() == null) {
+            Manufacturer manufacturer = car.getDetails().getManufacturer();
+            car.getDetails().setManufacturer(
+                    manufacturerService.findByNameOrId(manufacturer.getName(), manufacturer.getCode())
+            );
+            result = repository.save(car);
+        } else{
+            result = repository.findById(car.getId())
                     .map(carToBeUpdated -> {
                         carToBeUpdated.setDetails(car.getDetails());
                         carToBeUpdated.setLocation(car.getLocation());
+                        carToBeUpdated.setCondition(car.getCondition());
+
+                        String price = car.getPrice();
+                        if (StringUtils.isEmpty(price) || carToBeUpdated.getPrice().equals(price)) {
+                            // price hasn't changed in input so no change
+                            priceMode.set(PriceClient.PriceMode.EXISTING);
+                        }
                         return repository.save(carToBeUpdated);
                     }).orElseThrow(CarNotFoundException::new);
         }
+        return setPriceAndLocation(result, priceMode.get());
+    }
 
-        return repository.save(car);
+    /**
+     * Either creates or updates vehicles, based on prior existence of car
+     * @param cars A list of car objects, which can be either new or existing
+     * @return the new/updated car is stored in the repository
+     */
+    public List<Car> saveAll(@Valid List<Car> cars) {
+        return cars.stream()
+                .map(this::save)
+                .collect(Collectors.toList());
     }
 
     /**
      * Deletes a given car by ID
      * @param id the ID number of the car to delete
+     * @return number of affect db entries
      */
-    public void delete(Long id) {
+    public Car delete(Long id) {
         /**
          * TODO: Find the car by ID from the `repository` if it exists.
          *   If it does not exist, throw a CarNotFoundException
          */
-
+        Optional<Car> optionalCar = repository.findById(id);
+        Car car = optionalCar.orElseThrow(CarNotFoundException::new);
 
         /**
          * TODO: Delete the car from the repository.
+         * Pricing service maintains records for individual vehicles, so the pricing service record is deleted as well.
          */
-
-
+        repository.deleteById(car.getId());
+        pricing.deleteByVehicleId(car.getId());
+        if (repository.findById(id).isPresent()) {
+            car = Car.EMPTY;
+        }
+        return car;
     }
+//    public long delete(Long id) {
+//        /**
+//         * TODO: Find the car by ID from the `repository` if it exists.
+//         *   If it does not exist, throw a CarNotFoundException
+//         */
+//        Optional<Car> optionalCar = repository.findById(id);
+//        Car car = optionalCar.orElseThrow(CarNotFoundException::new);
+//
+//        /**
+//         * TODO: Delete the car from the repository.
+//         */
+//        repository.deleteById(car.getId());
+//        pricing.deleteByVehicleId(car.getId());
+//        long affected;
+//        if (repository.findById(id).isPresent()) {
+//            affected = 0;
+//        } else {
+//            affected = 1;
+//        }
+//        return affected;
+//    }
 }

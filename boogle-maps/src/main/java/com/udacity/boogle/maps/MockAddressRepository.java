@@ -2,13 +2,15 @@ package com.udacity.boogle.maps;
 
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
 /**
  * Implements a mock repository for generating a random address.
  */
-class MockAddressRepository {
+@Deprecated
+public class MockAddressRepository {
 
     /**
      * Gets a random address from the list.
@@ -36,6 +38,28 @@ class MockAddressRepository {
         String city = String.join(" ", list);
 
         return new Address(streetAndNumber, city, state, zip);
+    }
+
+    static List<Address> getList() {
+
+        return Arrays.stream(ADDRESSES).map(a -> {
+            String[] addressParts = a.split(",");
+            String streetAndNumber = addressParts[0];
+            String cityStateAndZip = addressParts[1];
+
+            String[] cityStateAndZipParts = cityStateAndZip.trim().split(" ");
+
+            LinkedList<String> list =
+                    Arrays.stream(cityStateAndZipParts).map(String::trim)
+                            .collect(Collectors.toCollection(LinkedList::new));
+
+            String zip = list.pollLast();
+            String state = list.pollLast();
+            String city = String.join(" ", list);
+
+            return new Address(streetAndNumber, city, state, zip);
+        })
+        .collect(Collectors.toList());
     }
 
     /**
