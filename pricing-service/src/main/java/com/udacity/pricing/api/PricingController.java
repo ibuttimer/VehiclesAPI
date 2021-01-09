@@ -13,8 +13,8 @@ import static com.udacity.pricing.config.Config.*;
  */
 @RestController
 @ApiResponses(value = {
-        @ApiResponse(code=400, message = "This is a bad request, please follow the API documentation for the proper request format."),
-        @ApiResponse(code=500, message = "The server is down. Please make sure that the Pricing microservice is running.")
+    @ApiResponse(code=400, message = "This is a bad request, please follow the API documentation for the proper request format."),
+    @ApiResponse(code=500, message = "The server is down. Please make sure that the Pricing microservice is running.")
 })
 public class PricingController {
 
@@ -30,6 +30,9 @@ public class PricingController {
      * @param vehicleId ID number of the vehicle for which the price is requested
      * @return price of the vehicle, or error that it was not found.
      */
+    @ApiResponses(value = {
+        @ApiResponse(code=404, message = "A record could not be found matching the request, please verify the request parameters."),
+    })
     @GetMapping(PRICING_GET_BY_VEHICLEID_URL)
     public Price getByVehicleId(@RequestParam Long vehicleId) {
         return pricingService.getPriceByVehicleId(vehicleId);

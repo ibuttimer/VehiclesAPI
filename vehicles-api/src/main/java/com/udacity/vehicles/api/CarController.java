@@ -3,9 +3,10 @@ package com.udacity.vehicles.api;
 
 import com.udacity.vehicles.domain.car.Car;
 import com.udacity.vehicles.service.CarService;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +24,10 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
  * Implements a REST-based controller for the Vehicles API.
  */
 @RestController
+@ApiResponses(value = {
+    @ApiResponse(code=400, message = "This is a bad request, please follow the API documentation for the proper request format."),
+    @ApiResponse(code=500, message = "The server is down. Please make sure that the Vehicle microservice is running.")
+})
 @RequestMapping(CARS_URL)
 class CarController {
 
@@ -51,6 +56,9 @@ class CarController {
      * @param id the id number of the given vehicle
      * @return all information for the requested vehicle
      */
+    @ApiResponses(value = {
+        @ApiResponse(code=404, message = "A record could not be found matching the request, please verify the request parameters."),
+    })
     @GetMapping(CARS_GET_BY_ID_URL)
     EntityModel<Car> get(@PathVariable Long id) {
         /**
@@ -68,6 +76,9 @@ class CarController {
      * @return response that the new vehicle was added to the system
      * @throws URISyntaxException if the request contains invalid fields or syntax
      */
+    @ApiResponses(value = {
+        @ApiResponse(code=201, message = "Entity successfully created"),
+    })
     @PostMapping
     ResponseEntity<?> post(@Valid @RequestBody Car car) throws URISyntaxException {
         /**
@@ -92,6 +103,9 @@ class CarController {
      * @param car The updated information about the related vehicle.
      * @return response that the vehicle was updated in the system
      */
+    @ApiResponses(value = {
+        @ApiResponse(code=404, message = "A record could not be found matching the request, please verify the request parameters."),
+    })
     @PutMapping(CARS_PUT_BY_ID_URL)
     ResponseEntity<?> put(@PathVariable Long id, @Valid @RequestBody Car car) {
         /**
@@ -112,6 +126,9 @@ class CarController {
      * @param id The ID number of the vehicle to remove.
      * @return response that the related vehicle is no longer in the system
      */
+    @ApiResponses(value = {
+        @ApiResponse(code=404, message = "A record could not be found matching the request, please verify the request parameters."),
+    })
     @DeleteMapping(CARS_DELETE_BY_ID_URL)
     ResponseEntity<?> delete(@PathVariable Long id) {
         /**
