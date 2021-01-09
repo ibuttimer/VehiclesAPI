@@ -62,14 +62,15 @@ class PricingControllerMockTest {
     public void deletePrice() throws Exception {
 
         Long vehicleId = 1L;
+        int result = 1;
 
-        when(pricingController.deleteByVehicleId(vehicleId)).thenReturn(1L);
+        when(pricingController.deleteByVehicleId(vehicleId)).thenReturn(result);
 
         mockMvc.perform(delete(
                     getDeleteByVehicleIdUrl(vehicleId)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().string("1"));
+                .andExpect(content().string(Integer.toString(result)));
 
 
         verify(pricingController, times(1)).deleteByVehicleId(vehicleId);

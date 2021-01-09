@@ -52,7 +52,7 @@ public class PricingService {
      * @param vehicleId - id of vehicle
      * @return number of affected entities
      */
-    public long deleteByVehicleId(Long vehicleId) {
+    public int deleteByVehicleId(Long vehicleId) {
         return priceRepository.deleteByVehicleId(vehicleId);
     }
 

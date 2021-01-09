@@ -41,7 +41,7 @@ public class PricingController {
     }
 
     @DeleteMapping(PRICING_DELETE_BY_VEHICLEID_URL)
-    public long deleteByVehicleId(@RequestParam Long vehicleId) {
+    public int deleteByVehicleId(@RequestParam Long vehicleId) {
         return pricingService.deleteByVehicleId(vehicleId);
     }
 }

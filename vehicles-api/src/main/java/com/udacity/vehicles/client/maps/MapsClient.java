@@ -13,6 +13,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Map;
 
+import static com.udacity.vehicles.config.Config.MAPS_DELETE_URL;
 import static com.udacity.vehicles.config.Config.MAPS_GET_URL;
 
 /**
@@ -43,15 +44,17 @@ public class MapsClient extends AbstractClient  {
     /**
      * Gets an address from the Maps client, given latitude and longitude.
      * @param location An object containing "lat" and "lon" of location
+     * @param vehicleId id of vehicle for which request is being made
      * @return An updated location including street, city, state and zip,
      *   or an exception message noting the Maps service is down
      */
     public Location getAddress(Location location, Long vehicleId) {
-        Address address = send(requestInfo(location), HttpMethod.GET, MAPS_GET_URL, Map.of(
-                LATITUDE_PARAM, location.getLat(),
-                LONGITUDE_PARAM, location.getLon(),
-                VEHICLE_ID_PARAM, vehicleId
-        ), Address.class);
+        Address address = send(requestInfo(location) + requestInfo(vehicleId), HttpMethod.GET, MAPS_GET_URL,
+                Map.of(
+                    LATITUDE_PARAM, location.getLat(),
+                    LONGITUDE_PARAM, location.getLon(),
+                    VEHICLE_ID_PARAM, vehicleId
+            ), Address.class);
         if (address == null) {
             address = undeterminedAddress();
         }
@@ -60,8 +63,34 @@ public class MapsClient extends AbstractClient  {
         return location;
     }
 
+    /**
+     * Delete an address allocation from the Maps client.
+     * @param vehicleId id of vehicle for which request is being made
+     * @return Number of allocations affected,
+     *   or an exception message noting the Maps service is down
+     */
+    public long delete(Long vehicleId) {
+        return send(requestInfo(vehicleId), HttpMethod.DELETE, MAPS_DELETE_URL, Map.of(
+                VEHICLE_ID_PARAM, vehicleId
+        ), Long.class);
+    }
+
+    /**
+     * Get location string for errors
+     * @param location
+     * @return
+     */
     private String requestInfo(Location location) {
-        return "location - (lat " + location.getLat() + ", lon " + location.getLat() + ")";
+        return "location(lat " + location.getLat() + ", lon " + location.getLat() + ") ";
+    }
+
+    /**
+     * Get vehicleId string for errors
+     * @param vehicleId
+     * @return
+     */
+    private String requestInfo(Long vehicleId) {
+        return "vehicleId(" + vehicleId + ") ";
     }
 
     private Address undeterminedAddress() {

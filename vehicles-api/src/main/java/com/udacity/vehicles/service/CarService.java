@@ -154,34 +154,15 @@ public class CarService {
 
         /**
          * TODO: Delete the car from the repository.
-         * Pricing service maintains records for individual vehicles, so the pricing service record is deleted as well.
+         * Pricing & map services maintains records for individual vehicles, so those records are deleted as well.
          */
-        repository.deleteById(car.getId());
-        pricing.deleteByVehicleId(car.getId());
+        id = car.getId();
+        repository.deleteById(id);
+        pricing.deleteByVehicleId(id);
+        maps.delete(id);
         if (repository.findById(id).isPresent()) {
             car = Car.EMPTY;
         }
         return car;
     }
-//    public long delete(Long id) {
-//        /**
-//         * TODO: Find the car by ID from the `repository` if it exists.
-//         *   If it does not exist, throw a CarNotFoundException
-//         */
-//        Optional<Car> optionalCar = repository.findById(id);
-//        Car car = optionalCar.orElseThrow(CarNotFoundException::new);
-//
-//        /**
-//         * TODO: Delete the car from the repository.
-//         */
-//        repository.deleteById(car.getId());
-//        pricing.deleteByVehicleId(car.getId());
-//        long affected;
-//        if (repository.findById(id).isPresent()) {
-//            affected = 0;
-//        } else {
-//            affected = 1;
-//        }
-//        return affected;
-//    }
 }

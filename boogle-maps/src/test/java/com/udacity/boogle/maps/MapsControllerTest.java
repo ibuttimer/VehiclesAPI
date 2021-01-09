@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static com.udacity.boogle.config.Config.MAPS_GET_URL;
+import static com.udacity.boogle.maps.MapsController.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -170,7 +171,7 @@ public class MapsControllerTest extends AbstractTest {
     @Test
     public void deleteAddress() throws Exception {
 
-        Address initial = getAddressAndVerify(MAPS_GET_URL, LAT_0, LON_0, CAR_ID);
+        getAddressAndVerify(MAPS_GET_URL, LAT_0, LON_0, CAR_ID);
 
         mockMvc.perform(
             delete(getDeleteUri(MAPS_GET_URL, CAR_ID)))
@@ -198,7 +199,7 @@ public class MapsControllerTest extends AbstractTest {
         URI uri = null;
         try {
             uri = new URI(
-                    Config.getUrl(baseUrl, Map.of("lat", lat, "lon", lon, "vehicleId", id)));
+                    Config.getUrl(baseUrl, Map.of(LATITUDE_PARAM, lat, LONGITUDE_PARAM, lon, VEHICLE_ID_PARAM, id)));
         } catch (URISyntaxException e) {
             e.printStackTrace();
             fail();
@@ -210,7 +211,7 @@ public class MapsControllerTest extends AbstractTest {
         URI uri = null;
         try {
             uri = new URI(
-                    Config.getUrl(baseUrl, Map.of("vehicleId", id)));
+                    Config.getUrl(baseUrl, Map.of(VEHICLE_ID_PARAM, id)));
         } catch (URISyntaxException e) {
             e.printStackTrace();
             fail();

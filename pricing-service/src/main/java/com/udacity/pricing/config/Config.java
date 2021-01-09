@@ -15,6 +15,7 @@ public class Config {
 
     // maps related
     public static final String MAPS_GET_URL = "/maps";
+    public static final String MAPS_DELETE_URL = MAPS_GET_URL;
 
     // vehicle related
     public static final String CARS_URL = "/cars";

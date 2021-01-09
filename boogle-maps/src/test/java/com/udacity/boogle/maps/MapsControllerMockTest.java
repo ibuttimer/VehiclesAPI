@@ -71,13 +71,14 @@ public class MapsControllerMockTest {
     @Test
     public void deleteAddress() throws Exception {
 
-        Mockito.when(addressService.deleteAddress(CAR_ID)).thenReturn(1L);
+        long result = 1L;
+        Mockito.when(addressService.deleteAddress(CAR_ID)).thenReturn(result);
 
         mvc.perform(
             delete(MapsControllerTest.getDeleteUri(MAPS_GET_URL, CAR_ID)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().string("1"));
+                .andExpect(content().string(Long.toString(result)));
     }
 
 
