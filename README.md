@@ -34,7 +34,7 @@ The project requires the use of Maven and Spring Boot, along with Java v11.
     + Addresses are allocated randomly from a fixed pool and stored on a per-vehicle and location basis.
     + If a vehicle location changes, the previously allocated address is released, and a new address allocated.
     + Address allocations may be deleted as required.
-    + Database address table is populated from a [json file](boogle-maps/src/main/resources/addresses.json) on application boot. 
+    + Database address table is populated from a [json file](boogle-maps/README.md#Arguments) on application boot. 
 - [Vehicles API](vehicles-api/README.md)
     + Vehicle data may be stored, updated and deleted.
     + Utilises [Pricing Service](pricing-service/README.md) to provide pricing data.

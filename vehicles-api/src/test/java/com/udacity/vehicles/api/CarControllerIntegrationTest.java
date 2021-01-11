@@ -41,9 +41,9 @@ import java.util.stream.IntStream;
 import static com.udacity.vehicles.api.CarControllerTest.getIdUri;
 import static com.udacity.vehicles.config.Config.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.hateoas.MediaTypes.HAL_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Implements testing of the CarController class.
@@ -76,6 +76,12 @@ public class CarControllerIntegrationTest extends AbstractTest {
     @Value("${maps.service.name}")
     private String mapsServiceName;
 
+    @Value("${maps_db_error}")
+    private String mapsDatabaseError;
+
+    @Value("${price_db_error}")
+    private String priceDatabaseError;
+
     static int NUM_MANUFACTURERS = 4;
     static String MANUFACTURER_NAME_TEMPLATE = "Manufacturer%d";
 
@@ -102,6 +108,12 @@ public class CarControllerIntegrationTest extends AbstractTest {
     public void beforeEach() {
         assertTrue(servicesService.serviceIsAvailable(pricingServiceName), () -> "Pricing service is not available");
         assertTrue(servicesService.serviceIsAvailable(mapsServiceName), () -> "Maps service is not available");
+
+        // check service databases are clear
+        if (carCount.get() == 0) {
+            assertEquals(0, carService.getVehicleCount(), mapsDatabaseError);
+            assertEquals(0, carService.getPriceCount(), priceDatabaseError);
+        }
 
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
@@ -291,7 +303,7 @@ public class CarControllerIntegrationTest extends AbstractTest {
         mockMvc.perform(
             get(new URI(CARS_URL)))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(HAL_JSON))
                 .andExpect(mvcResult -> {
                     for (int i = 0; i < elementsList.size(); i++) {
                         try {
@@ -332,7 +344,7 @@ public class CarControllerIntegrationTest extends AbstractTest {
             mockMvc.perform(
                     get(getIdUri(CARS_URL + CARS_GET_BY_ID_URL, car.getId())))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(HAL_JSON))
                 .andExpect(CarResultMatcher.of(elements, CarResultMatcher.Mode.OBJECT, log)));
 
         matchers.forEach(matcher -> {
@@ -362,7 +374,7 @@ public class CarControllerIntegrationTest extends AbstractTest {
         mockMvc.perform(
             delete(getIdUri(CARS_URL + CARS_DELETE_BY_ID_URL, car.getId())))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(HAL_JSON))
                 .andExpect(CarResultMatcher.of(elements, CarResultMatcher.Mode.OBJECT, log));
 
         mockMvc.perform(
@@ -429,6 +441,7 @@ public class CarControllerIntegrationTest extends AbstractTest {
             modelMapper.map(linkedCar, car);
             savedCar.set(car);
         };
+        // TODO update to use jsonPath()
 
         getAndVerifyCar(originalCar, List.of(readCarMatcher));
 
@@ -478,42 +491,49 @@ public class CarControllerIntegrationTest extends AbstractTest {
      */
     static class LinkedCar extends Car {
 
-        List<Link> links;
+        Links _links;
 
         public LinkedCar() {
             super();
         }
 
-        public List<Link> getLinks() {
-            return links;
+        public Links get_links() {
+            return _links;
         }
 
-        public void setLinks(List<Link> links) {
-            this.links = links;
+        public void set_links(Links _links) {
+            this._links = _links;
         }
 
+        static class Links {
+            Link self;
+            Link cars;
+
+            public Link getSelf() {
+                return self;
+            }
+
+            public void setSelf(Link self) {
+                this.self = self;
+            }
+
+            public Link getCars() {
+                return cars;
+            }
+
+            public void setCars(Link cars) {
+                this.cars = cars;
+            }
+        }
         static class Link {
-            String rel;
             String href;
-
-            public String getRel() {
-                return rel;
-            }
-
-            public void setRel(String rel) {
-                this.rel = rel;
-            }
 
             public String getHref() {
                 return href;
             }
-
             public void setHref(String href) {
                 this.href = href;
             }
         }
     }
-
-
-
 }

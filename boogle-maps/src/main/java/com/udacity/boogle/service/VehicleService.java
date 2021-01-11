@@ -32,4 +32,7 @@ public class VehicleService {
         return repository.findAllId();
     }
 
+    public long count() {
+        return repository.count();
+    }
 }

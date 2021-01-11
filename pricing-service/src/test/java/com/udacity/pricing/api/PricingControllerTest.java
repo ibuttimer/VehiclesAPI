@@ -1,9 +1,8 @@
 package com.udacity.pricing.api;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.udacity.pricing.config.Config;
 import com.udacity.pricing.AbstractTest;
+import com.udacity.pricing.config.Config;
 import com.udacity.pricing.domain.price.Price;
 import com.udacity.pricing.domain.price.PriceRepository;
 import org.assertj.core.util.Streams;
@@ -14,21 +13,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import static com.udacity.pricing.config.Config.*;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.hateoas.MediaTypes.HAL_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -36,15 +34,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class PricingControllerTest extends AbstractTest {
 
     @Autowired
-    PricingController pricingController;
-
-    @Autowired
     PriceRepository priceRepository;
 
     public List<Price> repositoryEntries;
     private static final int NUM_PRICES = 3;
     public static List<Price> PRICES = LongStream.range(0, NUM_PRICES)
-            .mapToObj(i -> Price.of("Currency"+i, BigDecimal.valueOf((i+1)*1_000_000), i + 1))
+            .mapToObj(i -> Price.of("Currency"+i, getIndexPrice((int) i), i + 1))
             .collect(Collectors.toList());
 
     @BeforeAll
@@ -75,18 +70,54 @@ class PricingControllerTest extends AbstractTest {
 
         repositoryEntries.forEach(p -> {
             try {
-                String expected = objectMapper.writeValueAsString(p);
-
+                // TODO update to use jsonPath()
                 mockMvc.perform(get(
                             getPriceByVehicleIdUrl(p.getVehicleId())))
                         .andExpect(status().isOk())
-                        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                        .andExpect(content().json(expected));
+                        .andExpect(content().contentType(HAL_JSON))
+                        .andExpect(mvcResult -> {
+                            String body = mvcResult.getResponse().getContentAsString();
+                            assertTrue(body.contains(p.getPrice().toString()));
+                            assertTrue(body.contains(p.getCurrency()));
+                            assertTrue(body.contains(p.getVehicleId().toString()));
+                        });
             } catch (Exception e) {
                 e.printStackTrace();
                 fail();
             }
         });
+    }
+
+    @DisplayName("Post price")
+    @Test
+    public void postPrice() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Price newPrice = Price.of("€", getIndexPrice(NUM_PRICES + 1), (long) (NUM_PRICES + 4));
+
+        try {
+            mockMvc.perform(post(
+                        PRICING_POST_URL).content(
+                                objectMapper.writeValueAsString(newPrice)))
+                    .andExpect(status().isCreated());
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @DisplayName("Get count")
+    @Test
+    public void getCount() {
+        try {
+            mockMvc.perform(get(
+                        PRICING_COUNT_URL))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(HAL_JSON))
+                    .andExpect(content().string(Integer.toString(NUM_PRICES)));
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
     }
 
     @Transactional
@@ -97,10 +128,10 @@ class PricingControllerTest extends AbstractTest {
         Price delete = repositoryEntries.remove( initialSize / 2);
 
         try {
-            mockMvc.perform(delete(
+            mockMvc.perform(get(
                         getDeleteByVehicleIdUrl(delete.getVehicleId())))
                     .andExpect(status().isOk())
-                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(content().contentType(HAL_JSON))
                     .andExpect(content().string("1"));
         } catch (Exception e) {
             e.printStackTrace();
@@ -111,50 +142,6 @@ class PricingControllerTest extends AbstractTest {
                 .collect(Collectors.toList());
         assertEquals(remaining.size(), initialSize - 1);
         assertFalse(remaining.contains(delete));
-    }
-
-    @DisplayName("Set new price by vehicle id")
-    @Test
-    public void newPrice() {
-        Price original = repositoryEntries.get( repositoryEntries.size() / 2);
-        AtomicReference<Price> update = new AtomicReference<>();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String notExpected = null;
-        try {
-            notExpected = objectMapper.writeValueAsString(original);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            fail();
-        }
-
-        try {
-            mockMvc.perform(get(
-                        getNewPriceByVehicleIdUrl(original.getVehicleId())))
-                    .andExpect(status().isOk())
-                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                    .andExpect(content().string(doesNotContainString(notExpected)))
-                    .andDo(mvcResult -> {
-                        update.set(objectMapper.readValue(
-                                mvcResult.getResponse().getContentAsString(), Price.class));
-                    });
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail();
-        }
-
-        Price updated = update.get();
-        if (updated != null) {
-            // verify only vehicle id is the same
-            assertEquals(original.getVehicleId(), updated.getVehicleId());
-            assertNotEquals(original.getId(), updated.getId());
-            assertNotEquals(original.getCurrency(), updated.getCurrency());
-            assertNotEquals(original.getPrice(), updated.getPrice());
-
-            // verify same number of price entities
-            assertEquals(repositoryEntries.size(), priceRepository.count());
-        } else {
-            fail("Update did not occur");
-        }
     }
 
     /**
@@ -176,15 +163,6 @@ class PricingControllerTest extends AbstractTest {
     }
 
     /**
-     * Get the url for the price of the specified vehicle
-     * @param vehicleId - id of vehicle
-     * @return
-     */
-    public static String getNewPriceByVehicleIdUrl(Long vehicleId) {
-        return getUrlWithVehicleIdUrl(PRICING_GET_RANDOM_URL, vehicleId) + "&currency=NewCurrency";
-    }
-
-    /**
      * Get the url to delete the price of the specified vehicle
      * @param vehicleId - id of vehicle
      * @return
@@ -197,4 +175,59 @@ class PricingControllerTest extends AbstractTest {
         return CoreMatchers.not(containsString(s));
     }
 
+
+    public static BigDecimal getIndexPrice(int index) {
+        return BigDecimal.valueOf((index+1)* 1_000_000L);
+    }
+
+    /**
+     * Utility class for mapping server response
+     */
+    static class LinkedPrice extends Price {
+
+        Links _links;
+
+        public LinkedPrice() {
+            super();
+        }
+
+        public Links get_links() {
+            return _links;
+        }
+
+        public void set_links(Links _links) {
+            this._links = _links;
+        }
+
+        static class Links {
+            Link self;
+            Link price;
+
+            public Link getSelf() {
+                return self;
+            }
+
+            public void setSelf(Link self) {
+                this.self = self;
+            }
+
+            public Link getPrice() {
+                return price;
+            }
+
+            public void setPrice(Link price) {
+                this.price = price;
+            }
+        }
+        static class Link {
+            String href;
+
+            public String getHref() {
+                return href;
+            }
+            public void setHref(String href) {
+                this.href = href;
+            }
+        }
+    }
 }

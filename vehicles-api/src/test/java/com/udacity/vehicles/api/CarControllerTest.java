@@ -31,6 +31,7 @@ import java.util.Collections;
 import static com.udacity.vehicles.config.Config.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.hateoas.MediaTypes.HAL_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -146,7 +147,7 @@ public class CarControllerTest {
         mvc.perform(
             get(new URI(CARS_URL)))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(HAL_JSON))
                 .andExpect(CarResultMatcher.of(finalJsonStr, CarResultMatcher.Mode.LIST, log));
     }
 
@@ -168,7 +169,7 @@ public class CarControllerTest {
         mvc.perform(
                 get(getIdUri(CARS_URL + CARS_GET_BY_ID_URL, car.getId())))
             .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(content().contentType(HAL_JSON))
             .andExpect(content().json(jsonStr));
     }
 
@@ -195,7 +196,7 @@ public class CarControllerTest {
         mvc.perform(
             delete(getIdUri(CARS_URL + CARS_DELETE_BY_ID_URL, car.getId())))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(HAL_JSON))
                 .andExpect(content().json(jsonStr));
 
         mvc.perform(

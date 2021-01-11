@@ -10,7 +10,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static com.udacity.vehicles.config.Config.*;
 
@@ -24,6 +27,7 @@ public class PriceClient extends AbstractClient {
 
     public static final String VEHICLE_ID_PARAM = "vehicleId";
     public static final String CURRENCY_PARAM = "currency";
+    public static final String PRICE_PARAM = "price";
 
     public enum PriceMode { EXISTING, FORCE_NEW }
 
@@ -57,10 +61,8 @@ public class PriceClient extends AbstractClient {
             currency = defaultCurrency;
         }
         String priceStr;
-        Price price = send(requestInfo(vehicleId), HttpMethod.GET, PRICING_GET_RANDOM_URL, Map.of(
-                    CURRENCY_PARAM, currency,
-                    VEHICLE_ID_PARAM, vehicleId
-            ), Price.class);
+        Price price = send(requestInfo(vehicleId), HttpMethod.POST, PRICING_POST_URL, Map.of(),
+                Price.of(currency, randomPrice(), vehicleId), Price.class);
         if (price == null) {
             // no response, get a new price
             priceStr = consultPrice;
@@ -93,7 +95,8 @@ public class PriceClient extends AbstractClient {
             ), Price.class);
         }
         if (price == null) {
-            // nothing in database, get a new price
+            // nothing in database or getting new price, get a new price
+            deleteByVehicleId(vehicleId);
             priceStr = getPrice(vehicleId);
         } else {
             priceStr = formatPrice(price);
@@ -108,13 +111,21 @@ public class PriceClient extends AbstractClient {
      */
     public long deleteByVehicleId(Long vehicleId) {
         long affected = 0L;
-        Long result = send(requestInfo(vehicleId), HttpMethod.DELETE, PRICING_DELETE_BY_VEHICLEID_URL, Map.of(
+        Long result = send(requestInfo(vehicleId), HttpMethod.GET, PRICING_DELETE_BY_VEHICLEID_URL, Map.of(
                 VEHICLE_ID_PARAM, vehicleId
         ), Long.class);
         if (result != null) {
             affected = result;
         }
         return affected;
+    }
+
+    /**
+     * Get the prices count
+     * @return
+     */
+    public long getCount() {
+        return send("", HttpMethod.GET, PRICING_COUNT_URL, Map.of(), Long.class);
     }
 
     private String requestInfo(Long vehicleId) {
@@ -134,4 +145,14 @@ public class PriceClient extends AbstractClient {
     private String formatPrice(Price price) {
         return String.format(priceFormat, price.getCurrency(), price.getPrice().toString());
     }
+
+    /**
+     * Gets a random price to fill in for a given vehicle ID.
+     * @return random price for a vehicle
+     */
+    public static BigDecimal randomPrice() {
+        return BigDecimal.valueOf(ThreadLocalRandom.current().nextDouble(1, 5))
+                .multiply(new BigDecimal("5000")).setScale(2, RoundingMode.HALF_UP);
+    }
+
 }

@@ -18,6 +18,5 @@ public class CarResourceAssembler implements RepresentationModelAssembler<Car, E
         return EntityModel.of(car,
                 linkTo(methodOn(CarController.class).get(car.getId())).withSelfRel(),
                 linkTo(methodOn(CarController.class).list()).withRel("cars"));
-
     }
 }

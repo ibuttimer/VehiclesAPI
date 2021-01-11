@@ -14,6 +14,16 @@ public class Price {
     public Price() {
     }
 
+    public Price(String currency, BigDecimal price, Long vehicleId) {
+        this.currency = currency;
+        this.price = price;
+        this.vehicleId = vehicleId;
+    }
+
+    public static Price of(String currency, BigDecimal price, Long vehicleId) {
+        return new Price(currency, price, vehicleId);
+    }
+
     public String getCurrency() {
         return currency;
     }

@@ -19,12 +19,15 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.web.reactive.function.client.WebClientCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.hateoas.config.EnableHypermediaSupport;
+import org.springframework.hateoas.config.HypermediaWebClientConfigurer;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -36,6 +39,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.springframework.core.io.ResourceLoader.CLASSPATH_URL_PREFIX;
+import static org.springframework.hateoas.config.EnableHypermediaSupport.HypermediaType.COLLECTION_JSON;
 
 /**
  * Launches a Spring Boot application for the Vehicles API,
@@ -45,6 +49,7 @@ import static org.springframework.core.io.ResourceLoader.CLASSPATH_URL_PREFIX;
 @SpringBootApplication
 @EnableJpaAuditing
 @EnableScheduling
+@EnableHypermediaSupport(type = { EnableHypermediaSupport.HypermediaType.HAL, COLLECTION_JSON})
 public class VehiclesApiApplication {
 
     private static final Logger log = LoggerFactory.getLogger(VehiclesApiApplication.class);
@@ -185,7 +190,6 @@ public class VehiclesApiApplication {
 
     /**
      * Web Client for the maps (location) API
-//     * @param discoveryClient - eureka discovery client
      * @param serviceName - name of pricing microservice
      * @return created maps endpoint
      */
@@ -197,7 +201,6 @@ public class VehiclesApiApplication {
 
     /**
      * Web Client for the pricing API
-//     * @param discoveryClient - eureka discovery client
      * @param serviceName - name of pricing microservice
      * @return created pricing endpoint
      */
@@ -206,4 +209,25 @@ public class VehiclesApiApplication {
         // get web client without base url as this will not be available if the service is not up
         return servicesService.getService(serviceName, ServicesService.BaseUrl.WITHOUT);
     }
+
+//    @Bean(name="configurer")
+//    HypermediaWebClientConfigurer c() {
+//        return new HypermediaWebClientConfigurer(new ObjectMapper(), List.of());
+//    }
+
+    @Autowired
+    HypermediaWebClientConfigurer configurer;
+
+    /**
+     * Bean to customise WebClients to interact using hypermedia
+     * @param configurer - Spring HATEOAS’s HypermediaWebClientConfigurer bean.
+     * @return
+     * @see <a href="https://docs.spring.io/spring-hateoas/docs/current/reference/html/#client.web-client">Configuring WebClient instances</a>
+     */
+    @Bean(name="webClientCustomizer")
+    @Autowired
+    WebClientCustomizer hypermediaWebClientCustomizer(HypermediaWebClientConfigurer configurer) {
+        return configurer::registerHypermediaTypes;
+    }
+
 }

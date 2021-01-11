@@ -9,13 +9,16 @@ public class Config {
     }
 
     // pricing related
-    public static final String PRICING_GET_BY_VEHICLEID_URL = "/services/price";
-    public static final String PRICING_GET_RANDOM_URL = "/services/price/random";
-    public static final String PRICING_DELETE_BY_VEHICLEID_URL = "/services/price";
+    public static final String PRICING_GET_BY_VEHICLEID_URL = "/prices/search/findPriceByVehicleId";
+    public static final String PRICING_POST_URL = "/prices";
+    public static final String PRICING_GET_URL = "/prices";
+    public static final String PRICING_DELETE_BY_VEHICLEID_URL = "/prices/search/deleteByVehicleId";
+    public static final String PRICING_COUNT_URL = "/prices/search/countPrices";
 
     // maps related
     public static final String MAPS_GET_URL = "/maps";
     public static final String MAPS_DELETE_URL = MAPS_GET_URL;
+    public static final String VEHICLES_GET_URL = "/vehicles";
 
     // vehicle related
     public static final String CARS_URL = "/cars";

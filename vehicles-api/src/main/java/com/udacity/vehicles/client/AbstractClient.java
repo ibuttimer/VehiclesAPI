@@ -8,8 +8,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.util.UriBuilder;
 
+import java.net.URI;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * Base class to interface with a Client for data.
@@ -38,41 +40,45 @@ public abstract class AbstractClient {
      * @param info - request info
      * @return service response
      */
-    protected <T> T send(String info, HttpMethod httpMethod, String path, Map<String, Object> query, Class<T> bodyClass) {
+    protected <T> T send(String info, HttpMethod httpMethod, String path, Map<String, Object> query, Object body, Class<T> bodyClass) {
         T result = null;
+        Function<UriBuilder, URI> uriFunction = uriBuilder -> {
+            UriBuilder builder = servicesService.setBaseUrl(getServiceName(), uriBuilder)
+                    .path(path);
+            for (String key : query.keySet()) {
+                builder.queryParam(key, query.get(key));
+            }
+            return builder.build();
+        };
         try {
             if (ready()) {
-                WebClient.RequestHeadersUriSpec<?> method;
+                WebClient.RequestHeadersSpec<?> headersSpec;
                 switch (httpMethod) {
                     case GET:
-                        method = client.get();
+                    case DELETE:
+                        headersSpec = (httpMethod == HttpMethod.GET ? client.get() : client.delete())
+                            .uri(uriFunction);
                         break;
                     case PUT:
-                        method = client.put();
-                        break;
                     case POST:
-                        method = client.post();
-                        break;
-                    case DELETE:
-                        method = client.delete();
+                        if (body != null) {
+                            headersSpec = (httpMethod == HttpMethod.PUT ? client.put() : client.post())
+                                    .uri(uriFunction)
+                                    .bodyValue(body);
+                        } else {
+                            headersSpec = (httpMethod == HttpMethod.PUT ? client.put() : client.post())
+                                    .uri(uriFunction);
+                        }
                         break;
                     default:
                         throw new UnsupportedOperationException(httpMethod.name() + " is not supported");
                 }
 
-                result = method
-                        .uri(uriBuilder -> {
-                            UriBuilder builder = servicesService.setBaseUrl(getServiceName(), uriBuilder)
-                                    .path(path);
-                            for (String key :
-                                    query.keySet()) {
-                                builder.queryParam(key, query.get(key));
-                            }
-                            return builder.build();
-                        })
-                        .retrieve()
-                        .bodyToMono(bodyClass)
-                        .block();
+                result = headersSpec
+                            .retrieve()
+                            .bodyToMono(bodyClass)
+                            .block();
+
             }
         } catch (WebClientResponseException wcre) {
             getLogger().warn(wcre.getStatusText() + ": " + wcre.getMessage());
@@ -83,6 +89,14 @@ public abstract class AbstractClient {
         return result;
     }
 
+    /**
+     * Send a request to the client, given vehicle ID.
+     * @param info - request info
+     * @return service response
+     */
+    protected <T> T send(String info, HttpMethod httpMethod, String path, Map<String, Object> query, Class<T> bodyClass) {
+        return send(info, httpMethod, path, query, null, bodyClass);
+    }
 
     /**
      * Check if service is configured

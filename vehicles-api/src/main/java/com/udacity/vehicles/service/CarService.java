@@ -160,9 +160,25 @@ public class CarService {
         repository.deleteById(id);
         pricing.deleteByVehicleId(id);
         maps.delete(id);
-        if (repository.findById(id).isPresent()) {
-            car = Car.EMPTY;
+        if (repository.existsById(id)) {
+            throw new ExpectationFailedException("Vehicle with id " + id + " not deleted");
         }
         return car;
+    }
+
+    /**
+     * Get the number of vehicles with an address allocation from the Maps client.
+     * @return Number of allocations
+     */
+    public long getVehicleCount() {
+        return maps.getVehicleCount();
+    }
+
+    /**
+     * Get the number of prices from the Prices client.
+     * @return Number of prices
+     */
+    public long getPriceCount() {
+        return pricing.getCount();
     }
 }

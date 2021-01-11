@@ -17,4 +17,6 @@ public interface PriceRepository extends CrudRepository<Price, Long> {
     @Query("DELETE FROM #{#entityName} p WHERE p.vehicleId=:vehicleId")
     int deleteByVehicleId(Long vehicleId);
 
+    @Query("SELECT COUNT(p) FROM #{#entityName} p")
+    long countPrices();
 }

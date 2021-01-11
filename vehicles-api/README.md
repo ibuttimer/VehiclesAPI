@@ -60,20 +60,20 @@ Import it in your favorite IDE as a Maven Project.
 
 ## Build and Test
 There are three test classes in the project:
-- [VehiclesApiApplicationTests](vehicles-api/src/test/java/com/udacity/vehicles/VehiclesApiApplicationTests.java)
+- [VehiclesApiApplicationTests](src/test/java/com/udacity/vehicles/VehiclesApiApplicationTests.java)
   
   Basic context load test
-- [CarControllerTest](vehicles-api/src/test/java/com/udacity/vehicles/api/CarControllerTest.java)
+- [CarControllerTest](src/test/java/com/udacity/vehicles/api/CarControllerTest.java)
 
   Mocked test
-- [CarControllerIntegrationTest](vehicles-api/src/test/java/com/udacity/vehicles/api/CarControllerIntegrationTest.java)
+- [CarControllerIntegrationTest](src/test/java/com/udacity/vehicles/api/CarControllerIntegrationTest.java)
 
-  Integration test, requiring other services to be running
+  Integration test, requiring other services to be running. The environment variable `SPRING_PROFILES_ACTIVE` should be set according to the following table to avoid unnecessary test failure.
 
 |SPRING_PROFILES_ACTIVE|Required     |Comment|
 |----------------------|-------------|-------|
 |not set|<ul><li>[x] Eureka server</li><li>[x] Pricing service</li><li>[x] Maps service</li></ul>|Can run all tests |
-|"test" |<ul><li>[ ] Eureka server</li><li>[ ] Pricing service</li><li>[ ] Maps service</li></ul>|VehiclesApiApplicationTests and CarControllerTest only|
+|"test" |<ul><li>[ ] Eureka server</li><li>[ ] Pricing service</li><li>[ ] Maps service</li></ul>|VehiclesApiApplicationTests and CarControllerTest only.|
 
 As tests are run as part of the 
 ```
@@ -89,7 +89,7 @@ commands, please ensure to set the environment variable `SPRING_PROFILES_ACTIVE`
 
 - --preload.manufacturer.file=`file.json`
 
-  Loads `file.json` from the resources folder and uses it to populate the database. Defaults to `manufacturers.json`.
+  Loads `file.json` from the resources folder and uses it to populate the database. Defaults to Defaults to [manufacturers.json](vehicles-api/src/main/resources/manufacturers.json).
 
 ```json
     [

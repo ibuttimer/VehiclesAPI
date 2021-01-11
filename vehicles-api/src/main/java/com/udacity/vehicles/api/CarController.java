@@ -3,8 +3,8 @@ package com.udacity.vehicles.api;
 
 import com.udacity.vehicles.domain.car.Car;
 import com.udacity.vehicles.service.CarService;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +17,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.udacity.vehicles.config.Config.*;
+import static com.udacity.vehicles.config.OpenApiConfig.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -25,8 +26,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
  */
 @RestController
 @ApiResponses(value = {
-    @ApiResponse(code=400, message = "This is a bad request, please follow the API documentation for the proper request format."),
-    @ApiResponse(code=500, message = "The server is down. Please make sure that the Vehicle microservice is running.")
+    @ApiResponse(responseCode = BAD_REQUEST, description = "This is a bad request, please follow the API documentation for the proper request format."),
+    @ApiResponse(responseCode = INTERNAL_SERVER_ERROR, description = "The server is down. Please make sure that the Vehicle microservice is running.")
 })
 @RequestMapping(CARS_URL)
 class CarController {
@@ -57,7 +58,7 @@ class CarController {
      * @return all information for the requested vehicle
      */
     @ApiResponses(value = {
-        @ApiResponse(code=404, message = "A record could not be found matching the request, please verify the request parameters."),
+        @ApiResponse(responseCode = NOT_FOUND, description = "A record could not be found matching the request, please verify the request parameters."),
     })
     @GetMapping(CARS_GET_BY_ID_URL)
     EntityModel<Car> get(@PathVariable Long id) {
@@ -77,7 +78,7 @@ class CarController {
      * @throws URISyntaxException if the request contains invalid fields or syntax
      */
     @ApiResponses(value = {
-        @ApiResponse(code=201, message = "Entity successfully created"),
+        @ApiResponse(responseCode = CREATED, description = "Entity successfully created"),
     })
     @PostMapping
     ResponseEntity<?> post(@Valid @RequestBody Car car) throws URISyntaxException {
@@ -104,7 +105,7 @@ class CarController {
      * @return response that the vehicle was updated in the system
      */
     @ApiResponses(value = {
-        @ApiResponse(code=404, message = "A record could not be found matching the request, please verify the request parameters."),
+        @ApiResponse(responseCode = NOT_FOUND, description = "A record could not be found matching the request, please verify the request parameters."),
     })
     @PutMapping(CARS_PUT_BY_ID_URL)
     ResponseEntity<?> put(@PathVariable Long id, @Valid @RequestBody Car car) {
@@ -127,7 +128,7 @@ class CarController {
      * @return response that the related vehicle is no longer in the system
      */
     @ApiResponses(value = {
-        @ApiResponse(code=404, message = "A record could not be found matching the request, please verify the request parameters."),
+        @ApiResponse(responseCode = NOT_FOUND, description = "A record could not be found matching the request, please verify the request parameters."),
     })
     @DeleteMapping(CARS_DELETE_BY_ID_URL)
     ResponseEntity<?> delete(@PathVariable Long id) {

@@ -13,8 +13,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Map;
 
-import static com.udacity.vehicles.config.Config.MAPS_DELETE_URL;
-import static com.udacity.vehicles.config.Config.MAPS_GET_URL;
+import static com.udacity.vehicles.config.Config.*;
 
 /**
  * Implements a class to interface with the Maps Client for location data.
@@ -73,6 +72,14 @@ public class MapsClient extends AbstractClient  {
         return send(requestInfo(vehicleId), HttpMethod.DELETE, MAPS_DELETE_URL, Map.of(
                 VEHICLE_ID_PARAM, vehicleId
         ), Long.class);
+    }
+
+    /**
+     * Get the number of vehicles with an allocation from the Maps client.
+     * @return Number of allocations
+     */
+    public long getVehicleCount() {
+        return send("", HttpMethod.GET, VEHICLES_GET_URL, Map.of(), Long.class);
     }
 
     /**

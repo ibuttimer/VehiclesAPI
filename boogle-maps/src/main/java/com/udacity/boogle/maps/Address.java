@@ -1,6 +1,7 @@
 package com.udacity.boogle.maps;
 
 import javax.persistence.Embeddable;
+import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 /**
@@ -9,9 +10,13 @@ import java.util.Objects;
 @Embeddable
 public class Address {
 
+    @NotNull
     private String address;
+    @NotNull
     private String city;
+    @NotNull
     private String state;
+    @NotNull
     private String zip;
 
     public Address() {

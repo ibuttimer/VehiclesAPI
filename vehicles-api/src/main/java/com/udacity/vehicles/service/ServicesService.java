@@ -3,6 +3,7 @@ package com.udacity.vehicles.service;
 import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.web.reactive.function.client.WebClientCustomizer;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.stereotype.Service;
@@ -26,12 +27,15 @@ public class ServicesService {
 
     private DiscoveryClient discoveryClient;
 
+    private WebClientCustomizer webClientCustomizer;
+
     private Map<String, ServiceEntry> configured;
 
     private ReentrantLock mapLock;
 
-    public ServicesService(DiscoveryClient discoveryClient) {
+    public ServicesService(DiscoveryClient discoveryClient, WebClientCustomizer webClientCustomizer) {
         this.discoveryClient = discoveryClient;
+        this.webClientCustomizer = webClientCustomizer;
         this.configured = Maps.newHashMap();
         this.mapLock = new ReentrantLock();
     }
@@ -54,20 +58,25 @@ public class ServicesService {
      * @param serviceName - name of microservice
      * @param baseUrl - flag to configure baseUrl
      * @return web client
+     * @see <a href="https://docs.spring.io/spring-hateoas/docs/current/reference/html/#client.web-client">Configuring WebClient instances</a>
      */
     public WebClient getService(String serviceName, BaseUrl baseUrl) {
+        WebClient.Builder builder = WebClient.builder();
+        webClientCustomizer.customize(builder);
         WebClient webClient;
         boolean serviceConfigured = configureService(serviceName);
         if (serviceConfigured && baseUrl == BaseUrl.WITH) {
             mapLock.lock();
             try {
                 ServiceEntry entry = configured.get(serviceName);
-                webClient = WebClient.create(entry.baseUri.toString());
+                webClient = builder
+                        .baseUrl(entry.baseUri.toString())
+                        .build();
             } finally {
                 mapLock.unlock();
             }
         } else {
-            webClient = WebClient.create();
+            webClient = builder.build();
         }
         return webClient;
     }

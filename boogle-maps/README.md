@@ -45,7 +45,7 @@ Swagger UI: [http://localhost:9191/swagger-ui.html](http://localhost:9191/swagge
 
 - --preload.file=`file.json`
 
-  Loads `file.json` from the resources folder and uses it to populate the database. Defaults to `addresses.json`. 
+  Loads `file.json` from the resources folder and uses it to populate the database. Defaults to [addresses.json](boogle-maps/src/main/resources/addresses.json). 
 
 ```json
     [

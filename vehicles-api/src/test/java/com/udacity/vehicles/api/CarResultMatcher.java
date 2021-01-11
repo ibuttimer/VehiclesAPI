@@ -74,8 +74,8 @@ class CarResultMatcher implements org.springframework.test.web.servlet.ResultMat
 
         boolean found = false;
         if (mode == Mode.LIST) {
-            // object with "content" & "links"
-            JsonNode contentNode = node.get("content");
+            // object with embedded content
+            JsonNode contentNode = node.get("_embedded").get("cars");
             assertEquals(JsonNodeType.ARRAY, contentNode.getNodeType());
 
             for (Iterator<JsonNode> it = contentNode.elements(); it.hasNext(); ) {
@@ -95,7 +95,10 @@ class CarResultMatcher implements org.springframework.test.web.servlet.ResultMat
         } else {
             found = checkMatchCount(node);
         }
-        assertTrue(found, () -> Arrays.toString(stringList.toArray(new String[0])) + " does not match " + content);
+        assertTrue(found, () ->
+            String.format("Matcher %s%n" +
+                    "does not match%n" +
+                    "Content: %s", Arrays.toString(stringList.toArray(new String[0])), content));
     }
 
     private boolean checkMatchCount(JsonNode element) {
@@ -111,3 +114,55 @@ class CarResultMatcher implements org.springframework.test.web.servlet.ResultMat
                 .sum() == stringList.size();
     }
 }
+
+/* Format of list response
+{
+  "_embedded": {
+    "cars": [
+      {
+        "id": 1,
+        "createdAt": "2021-01-10T09:32:01.49814",
+        "modifiedAt": "2021-01-10T10:52:09.519065",
+        "condition": "NEW",
+        "details": {
+          "body": "string",
+          "model": "string",
+          "manufacturer": {
+            "code": 100,
+            "name": "Audi"
+          },
+          "numberOfDoors": 0,
+          "fuelType": "string",
+          "engine": "string",
+          "mileage": 0,
+          "modelYear": 0,
+          "productionYear": 0,
+          "externalColor": "string"
+        },
+        "location": {
+          "lat": 0,
+          "lon": 0,
+          "address": "5335 Hwy 280 South",
+          "city": "Hoover",
+          "state": "AL",
+          "zip": "35242"
+        },
+        "price": "€ 16350.10",
+        "_links": {
+          "self": {
+            "href": "http://localhost:8080/cars/1"
+          },
+          "cars": {
+            "href": "http://localhost:8080/cars"
+          }
+        }
+      }
+    ]
+  },
+  "_links": {
+    "self": {
+      "href": "http://localhost:8080/cars"
+    }
+  }
+}
+ */
