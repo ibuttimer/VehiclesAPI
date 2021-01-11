@@ -64,6 +64,12 @@ Swagger UI: [http://localhost:8082/swagger-ui.html](http://localhost:8082/swagge
 ```
 
 ## Database
+The default database configuration is
+
+|H2 console|JDBC URL|Username|Password|
+|---|---|---|---|
+|[http://localhost:8082/h2-console](http://localhost:8082/h2-console)|jdbc:h2:mem:pricedb|sa| | 
+
 To clear the database execute the following commands from the [H2 console](http://localhost:8082/h2-console)
 ```roomsql
 DELETE FROM PRICE; 

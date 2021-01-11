@@ -4,6 +4,8 @@ This is a Eureka server for the project.
 
 ## Instructions
 
+#### Run the code
+
 Via shell, it can be started using
 
 ```

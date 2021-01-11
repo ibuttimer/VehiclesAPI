@@ -89,7 +89,7 @@ commands, please ensure to set the environment variable `SPRING_PROFILES_ACTIVE`
 
 - --preload.manufacturer.file=`file.json`
 
-  Loads `file.json` from the resources folder and uses it to populate the database. Defaults to Defaults to [manufacturers.json](vehicles-api/src/main/resources/manufacturers.json).
+  Loads `file.json` from the resources folder and uses it to populate the database. Defaults to Defaults to [manufacturers.json](src/main/resources/manufacturers.json).
 
 ```json
     [
@@ -202,6 +202,12 @@ the Vehicle information to be presented
 `DELETE` `/cars/{id}`
 
 ## Database
+The default database configuration is
+
+|H2 console|JDBC URL|Username|Password|
+|---|---|---|---|
+|[http://localhost:8080/h2-console](http://localhost:8080/h2-console)|jdbc:h2:mem:vehicledb|sa| | 
+
 To clear the database execute the following commands from the [H2 console](http://localhost:8080/h2-console)
 ```roomsql
 

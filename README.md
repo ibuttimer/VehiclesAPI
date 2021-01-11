@@ -24,7 +24,7 @@ The project requires the use of Maven and Spring Boot, along with Java v11.
   
     See [Eureka Server](eureka-server/README.md) for more details.
 
-- All three applications have been implemented as Eureka client microservices with Spring Boot Actuator, H2 database and Swagger UI. 
+- All three applications have been implemented as Eureka client microservices with Spring Boot Actuator, H2 database and OpenAPI Swagger UI. 
 - [links.html](links.html) provides convenient access to all the applications.
 - [Pricing Service](pricing-service/README.md)
     + Prices are stored on a per-vehicle basis.
@@ -40,7 +40,7 @@ The project requires the use of Maven and Spring Boot, along with Java v11.
     + Utilises [Pricing Service](pricing-service/README.md) to provide pricing data.
     + Utilises [Boogle Maps](boogle-maps/README.md) to provide address data.
     + Database manufacturer table is populated from a [json file](vehicles-api/src/main/resources/manufacturers.json) on application boot. See [Arguments](vehicles-api/README.md#arguments).
-    + Database car table may be populated from a [json file](vehicles-api/src/main/resources/manufacturers.json) on application boot.. See [Arguments](vehicles-api/README.md#arguments).
+    + Database car table may be populated from a [json file](vehicles-api/src/main/resources/cars.json) on application boot. See [Arguments](vehicles-api/README.md#arguments).
 
 ## Build and Test
 1. [Eureka Server](eureka-server/README.md)
@@ -54,9 +54,9 @@ The project requires the use of Maven and Spring Boot, along with Java v11.
     Please see [Build and Test](vehicles-api/README.md#build-and-test) for details
 
 ## Execution
-1. Start [Eureka Server](eureka-server/README.md)
-1. Start [Pricing Service](pricing-service/README.md) and [Boogle Maps](boogle-maps/README.md)
-1. Start [Vehicles API](vehicles-api/README.md)
+1. Start [Eureka Server](eureka-server/README.md#run-the-code)
+1. Start [Pricing Service](pricing-service/README.md#run-the-code) and [Boogle Maps](boogle-maps/README.md#run-the-code)
+1. Start [Vehicles API](vehicles-api/README.md#run-the-code)
 
 *Note:*
 [Vehicles API](vehicles-api/README.md), [Pricing Service](pricing-service/README.md) and [Boogle Maps](boogle-maps/README.md) may be started in any order but [Eureka Server](eureka-server/README.md) should be started first.
