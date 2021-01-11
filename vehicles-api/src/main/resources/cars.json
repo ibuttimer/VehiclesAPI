@@ -16,21 +16,20 @@
       "externalColor": "silver"
     }
   },{
-  "condition": "USED",
-  "details": {
-    "body": "sedan",
-    "model": "Focus",
-    "manufacturer": {
-      "name": "Ford"
-    },
-    "numberOfDoors": 5,
-    "fuelType": "diesel",
-    "engine": "2.5",
-    "mileage": 20000,
-    "modelYear": 2000,
-    "productionYear": 2002,
-    "externalColor": "blue"
+    "condition": "USED",
+    "details": {
+      "body": "sedan",
+      "model": "Focus",
+      "manufacturer": {
+        "name": "Ford"
+      },
+      "numberOfDoors": 5,
+      "fuelType": "diesel",
+      "engine": "2.5",
+      "mileage": 20000,
+      "modelYear": 2000,
+      "productionYear": 2002,
+      "externalColor": "blue"
+    }
   }
-}
-]
 ]
